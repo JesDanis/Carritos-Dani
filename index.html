@@ -114,36 +114,18 @@
         background-color: var(--color-superposicion-fondo);
         z-index: -1;
     }
-
-    /* Campo de estrellas: puntos fijos que titilan, distinto del sistema de
-       partículas que ya existia (esas flotan hacia arriba desde abajo, no
-       dan un efecto de "cielo"). Siempre detrás del ramo (mismo z-index que
-       .night, pero despues en el DOM asi pinta encima de ella). */
     #star-field { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; background: #fff; animation-name: star-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
     @keyframes star-twinkle { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
 
-    /* Autitos de fondo: cruzan la pantalla en diagonal, lento, en bucle
-       continuo (a diferencia de los de la intro, que vuelan una sola vez) -
-       mas chicos, mas tenues, y siempre detrás de la envoltura/tallos/flores
-       (mismo z-index que .night/.star-field, pintados despues de esas dos
-       asi quedan encima del cielo pero por detras de cualquier elemento del
-       ramo, que empieza en z-index:0). Pausados igual que el resto del ramo
-       hasta el primer toque (no llevan la excepcion que sí tiene
-       #intro-overlay), asi que "en todo momento" significa "mientras el
-       ramo esta a la vista", no durante la pantalla de inicio. */
     #bg-cars { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
     .bg-car { position: absolute; width: 27vmin; opacity: 0; animation-timing-function: linear; animation-iteration-count: infinite; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .4)); }
     .bg-car img { display: block; width: 100%; height: auto; }
     .bg-car--dr { animation-name: bgfly-dr; }
     .bg-car--dl { animation-name: bgfly-dl; }
-    /* Trayecto mas plano que antes (18vh de caida en vez de 150vh - casi
-       horizontal, con solo una leve inclinacion hacia abajo) a pedido
-       explicito: "no tan en diagonal, un poco mas recto". */
     @keyframes bgfly-dr { 0% { transform: translate(-25vw, 0vh) rotate(6deg); opacity: 0; } 8% { opacity: .85; } 92% { opacity: .85; } 100% { transform: translate(125vw, 18vh) rotate(6deg); opacity: 0; } }
     @keyframes bgfly-dl { 0% { transform: translate(125vw, 0vh) rotate(-6deg); opacity: 0; } 8% { opacity: .85; } 92% { opacity: .85; } 100% { transform: translate(-25vw, 18vh) rotate(-6deg); opacity: 0; } }
-    /* Mismo propulsor de particulas que los autitos de la intro, mas chico
-       (acorde al tamaño reducido de estos autos de fondo). */
+
     .bg-car .thruster { width: 8vmin; height: 4vmin; }
     .bg-car--dr .thruster { left: -6.5vmin; }
     .bg-car--dl .thruster { right: -6.5vmin; }
@@ -184,16 +166,6 @@
         cursor: pointer;
         z-index: 11;
     }
-
-    /* Contenedor de las flores: con su propio position+z-index (no solo
-       las flores adentro) crea su PROPIO contexto de apilamiento, así queda
-       garantizado por DEBAJO de TODOS los tallos de una sola vez (que llegan
-       hasta z:8) sin depender de que cada z-index individual de cada flor
-       "se escape" y termine compitiendo directo contra los tallos - los
-       hotwheels y sus tallos van siempre encima de las flores, a propósito
-       (pedido explícito: "los hotwheels y sus tallos superpuestos a las
-       flores"). z-index:0 los deja empatados con .flower-wrapping, por
-       debajo de cualquier tallo (el más bajo es z:1). */
     #flowers-mount { position: relative; z-index: 0; }
 
     /* --- ESTILO PARA EL ENVOLTORIO --- */
@@ -212,16 +184,7 @@
         filter: drop-shadow(0 0 3vmin rgba(69, 200, 255, 0.9)) drop-shadow(0 0 7vmin rgba(69, 200, 255, 0.65)) drop-shadow(0 0 12vmin rgba(69, 200, 255, 0.4));
     }
 
-    /*
-        =============================================
-        PANEL DE CONTROL PARA TODOS LOS TALLOS
-        =============================================
-    */
-    /* TALLOS DE AUTOS: ahora en la base (cortos) - antes eran los más altos,
-       intercambiados de posición con las margaritas a pedido explícito
-       ("las flores en la parte más alta, los hotwheels abajo en la base").
-       Los nombres de las clases (--6/7/8 "traseros", etc.) ya no describen
-       su altura real, se dejan igual para no reescribir el HTML que las usa. */
+ 
     .head-stem--6 { --h: 45vmin; --d: 0s; left: 50%; animation: sway-left-car-wide 5.5s linear infinite; z-index: 1; }
     .head-stem--8 { --h: 47vmin; --d: 0s; left: 50%; animation: sway-right-car-wide 5.2s linear infinite; z-index: 1; }
     .head-stem--1 { --h: 54vmin; --d: 0s; left: 50%; animation: sway-left-20 5s linear infinite; z-index: 5; }
@@ -229,60 +192,24 @@
     .head-stem--3 { --h: 51vmin; --d: 0s; left: 50%; animation: sway-right-20 4.8s linear infinite; z-index: 5; }
     .head-stem--4 { --h: 43vmin; --d: 0s; left: 50%; animation: sway-left-10 5.2s linear infinite; z-index: 8; }
     .head-stem--5 { --h: 41vmin; --d: 0s; left: 50%; animation: sway-right-10 5s linear infinite; z-index: 8; }
-    /* MARGARITAS AZULES: 12 en total, armadas por JS (ver buildFlowers() al
-       final del archivo) en vez de escritas a mano - con 2 capas de pétalos
-       cada una (24 divs por flor) habría sido demasiado HTML repetido. Sus
-       posiciones/z-index/altura se definen en FLOWER_SLOTS, intercaladas
-       entre los 3 niveles de tallos de arriba (z:1 atrás, z:5 medio, z:8
-       intermedio) en vez de quedar todas juntas al frente como antes. */
-
-    /*
-        =============================================
-        LÓGICA INTERNA (NO TOCAR)
-        =============================================
-    */
+  
     .head-stem .flower__line, .flower .flower__line { height: var(--h); animation-delay: var(--d); }
-    /* Selectores agrupados (antes 3 reglas separadas para head1 y 2 para head4,
-       cada una con su propia ruta de imagen repetida - generar-html-entrega.mjs
-       embebe cada ocurrencia por separado, asi que triplicaba/duplicaba el peso
-       de estas imagenes en el HTML de entrega sin ningun cambio visual). */
+
     .head-stem--1 .head-stem__image, .head-stem--5 .head-stem__image, .head-stem--6 .head-stem__image { background-image: url('assets/head1.png'); }
     .head-stem--2 .head-stem__image { background-image: url('assets/head2.png'); }
     .head-stem--3 .head-stem__image { background-image: url('assets/head3.png'); }
     .head-stem--4 .head-stem__image, .head-stem--8 .head-stem__image { background-image: url('assets/head4.png'); }
-    /* Hotwheels de los extremos: mas grandes que el resto (35vmin base) y
-       con mas espacio para lucirse, pedido explicito ("sobra espacio"). */
+
     .head-stem--6 .head-stem__image, .head-stem--8 .head-stem__image { width: 43vmin; height: 43vmin; }
     .head-stem--2 .head-stem__image { width: 30vmin; height: 30vmin; }
-
-    /* ... (El resto de tus estilos CSS van aquí, no es necesario copiarlos todos de nuevo)... */
-
-    /* z-index explícito: sin esto, .flower__line (el tallo verde, que viene
-       DESPUÉS en el HTML) pintaba por encima de .flower__leafs (la cabeza
-       con los pétalos) cada vez que se cruzaban en pantalla - ninguno de
-       los dos tenía z-index propio, así que ganaba el orden del DOM, no la
-       cabeza de la flor. Se notaba sobre todo durante la animación de
-       aparición (el tallo creciendo por detrás/encima de la flor todavía
-       floreciendo). */
     .flower__leafs { position: relative; z-index: 2; animation: blooming-flower 2s backwards; will-change: transform; filter: drop-shadow(0 0 2.5vmin rgba(69, 200, 255, 1)) drop-shadow(0 0 6vmin rgba(69, 200, 255, 0.8)) drop-shadow(0 0 10vmin rgba(69, 200, 255, 0.5)); }
     .flower__leafs::after { content: ""; position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); width: 12vmin; height: 12vmin; background-color: var(--color-petalo-neon); filter: blur(11vmin); }
-    /* MODELO DE FLOR: margarita grande de doble capa - una capa exterior de
-       14 pétalos largos y una interior de 13 pétalos más cortos, rotada a
-       la mitad de paso (para que no queden pegados exactamente encima de
-       los de afuera, como una margarita real), mucho más grandes que la
-       version anterior. El cáliz (disco verde en la base) tapa la unión con
-       el tallo, que antes quedaba expuesta. */
     .flower__calyx { position: absolute; bottom: -1.5vmin; left: 50%; margin-left: -4.5vmin; width: 9vmin; height: 7vmin; border-radius: 50% 50% 40% 40%; background-image: radial-gradient(circle at 50% 30%, var(--color-calyx), var(--color-calyx-sombra) 80%); z-index: 0; }
     .flower__leaf { position: absolute; bottom: 0; left: 50%; background-image: linear-gradient(to top, var(--color-petalo-gradiente), var(--color-petalo-principal)); transform-origin: bottom center; opacity: 0.97; box-shadow: inset 0 0 1.6vmin rgba(255, 255, 255, 0.6); z-index: 1; }
     .flower__leaf--outer { width: 5vmin; height: 25vmin; margin-left: -2.5vmin; border-radius: 50% 50% 45% 45%/70% 70% 30% 30%; }
     .flower__leaf--inner { width: 3.6vmin; height: 18vmin; margin-left: -1.8vmin; border-radius: 50% 50% 45% 45%/70% 70% 30% 30%; opacity: 0.92; }
     .flower__white-circle { position: absolute; left: 50%; top: 0; margin-left: -4vmin; margin-top: -4vmin; width: 8vmin; height: 8vmin; border-radius: 50%; background-image: radial-gradient(circle at 38% 32%, #6fa8e8, var(--color-centro-flor) 55%, var(--color-centro-flor-sombra) 100%); box-shadow: inset 0 0 1.6vmin rgba(0, 10, 40, 0.45); z-index: 2; }
     .flower__white-circle::after { content: ""; position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: 62%; height: 62%; border-radius: inherit; background-image: repeating-radial-gradient(circle, rgba(0, 10, 40, 0.22) 0, rgba(0, 10, 40, 0.22) .3vmin, transparent .3vmin, transparent .8vmin); }
-    /* SEGUNDO TIPO DE FLOR ("clásica"): el diseño original de 4 pétalos
-       anchos tipo rosa, de antes de que este ramo se rediseñara a
-       margaritas - se reincorpora intercalado con las margaritas (ver
-       FLOWER_SLOTS más abajo), mismos colores/cáliz que la margarita, para
-       que el ramo tenga variedad de formas en vez de una sola repetida. */
     .flower__leaf--classic { position: absolute; bottom: 0; left: 50%; width: 8vmin; height: 11vmin; border-radius: 51% 49% 47% 53%/44% 45% 55% 69%; background-image: linear-gradient(to top, var(--color-petalo-gradiente), var(--color-petalo-principal)); transform-origin: bottom center; opacity: 0.9; box-shadow: inset 0 0 2vmin rgba(255, 255, 255, 0.5); z-index: 1; }
     .flower__leaf--classic-1 { transform: translate(-10%, 1%) rotateY(40deg) rotateX(-50deg); }
     .flower__leaf--classic-2 { transform: translate(-50%, -4%) rotateX(40deg); }
@@ -382,11 +309,6 @@
     .grow-ans { animation: grow-ans 2s var(--d) backwards }
     .growing-grass { animation: growing-grass-ans 1s 2s backwards }
     .container * { animation-play-state: paused !important }
-    /* Excepcion a la regla de arriba: los autitos de la intro SI deben
-       animar mientras "container" sigue puesto en el body (eso es
-       justamente lo que mantiene el ramo pausado/invisible durante la
-       intro) - un selector con ID pesa mas que ".container *" aunque los
-       dos tengan !important, asi que esta regla gana. */
     .container #intro-overlay, .container #intro-overlay * { animation-play-state: running !important }
     @media (max-width:600px) { .flowers { transform: scale(.7); bottom: 5vh; } .title-container { flex-direction: column; gap: 10px; top: 3%; justify-content: center; align-items: center } }
     @keyframes grow-ans { 0% { transform: scale(0); opacity: 0 } }
@@ -397,10 +319,6 @@
     @keyframes sway-left-20 { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(-22deg); } }
     @keyframes sway-left-30 { 0%, 100% { transform: rotate(-22deg); } 50% { transform: rotate(-15deg); } }
     @keyframes sway-left-35 { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(-15deg); } }
-    /* Solo para los hotwheels de las puntas (--6/--8) - separado de
-       sway-left-35/right-35 de arriba a proposito: esas dos las usan
-       TAMBIEN un par de flores (FLOWER_SLOTS), y un ajuste de angulo
-       pedido solo para los hotwheels no debe abrir de mas esas flores. */
     @keyframes sway-left-car-wide { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(-38deg); } }
     @keyframes sway-right-10 { 0%, 100% { transform: rotate(8deg); } 50% { transform: rotate(12deg); } }
     @keyframes sway-right-20 { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(22deg); } }
@@ -409,17 +327,6 @@
     @keyframes sway-right-car-wide { 0%, 100% { transform: rotate(30deg); } 50% { transform: rotate(38deg); } }
     @keyframes blooming-leaf-right { 0% { transform-origin: left; transform: rotate(70deg) rotateY(30deg) scale(0) } }
     @keyframes blooming-leaf-left { 0% { transform-origin: right; transform: rotate(-70deg) rotateY(30deg) scale(0) } }
-    /* transform:scaleY en vez de animar height directo (antes 0%{height:0}
-       interpolando hasta el var(--h) de la regla de arriba): height fuerza
-       un reflow de layout en CADA frame, para las 8 flores a la vez
-       (mismo momento en que otros ~250 elementos empiezan a animar al
-       revelar el ramo) - eso es lo que trababa el navegador justo al tocar
-       "abrir", sobre todo en celulares (reporte real 2026-09-25). scaleY
-       con transform-origin:bottom da el mismo resultado visual (los hijos
-       del tallo estan posicionados en % de su altura, que ya queda fija en
-       var(--h) - escalar el contenedor entero los mueve proporcional e
-       identico a como se veian con el height animado) pero corre en el
-       compositor/GPU, sin tocar layout. */
     @keyframes grow-flower-tree { 0% { transform: scaleY(0); border-radius: 1vmin } }
     @keyframes blooming-flower { 0% { transform: scale(0) } }
     @keyframes moving-grass { 0%, 100% { transform: rotate(-48deg) rotateY(40deg) } 50% { transform: rotate(-50deg) rotateY(40deg) } }
@@ -528,14 +435,6 @@
         /* ===== SOMBRA MEJORADA PARA MAYOR VISIBILIDAD ===== */
         text-shadow: 0px 0px 10px rgba(0, 0, 0, 1), 3px 3px 5px rgba(0, 0, 0, 0.9);
     }
-    /*
-    ==================================================================
-    ===> PUNTO DE CONTROL DEFINITIVO PARA MOVER EL RAMO
-    ==================================================================
-    Modifica el valor de 'margin-bottom' para cambiar la altura.
-    - Un valor MÁS GRANDE (ej: 15vh) moverá todo MÁS ARRIBA.
-    - Un valor MÁS PEQUEÑO (ej: 0vh) moverá todo MÁS ABAJO.
-    */
     .ramo-container {
         width: 100%;
         display: flex;
@@ -543,11 +442,6 @@
         align-items: center;
         margin-bottom: 3vh; /* <--- AJUSTA ESTE VALOR PARA SUBIR O BAJAR */
     }
-
-    /* --- INTRO: autitos Hot Wheels volando con su rayo de propulsor detrás,
-       antes de que se despliegue el ramo. Foto real de auto (no el icono
-       estilizado head1-4.png que usan los tallos) - se muestra una sola vez,
-       nunca vuelve a aparecer tras la primera carga. --- */
     #intro-overlay {
         position: fixed;
         inset: 0;
@@ -567,11 +461,6 @@
         animation-fill-mode: forwards;
     }
     .intro-car img { display: block; width: 100%; height: auto; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); }
-    /* Propulsor de partículas (reemplaza el emoji de rayo ⚡ de antes): un
-       puñado de puntitos brillantes detrás de cada auto, cada uno con su
-       propio tamaño/retraso (armados por JS, ver buildIntroCars), que se
-       alejan del auto y se apagan en bucle - como el humo/chispas de un
-       cohete, no un simbolo estatico. */
     .thruster { position: absolute; top: 50%; width: 18vmin; height: 8vmin; pointer-events: none; }
     .intro-car--ltr .thruster { left: -16vmin; }
     .intro-car--rtl .thruster { right: -16vmin; }
@@ -612,21 +501,14 @@
     <div id="star-field"></div>
     <div id="bg-cars"></div>
 
-    <!-- INTRO: autitos Hot Wheels volando con su rayo de propulsor detrás,
-         antes de que aparezca el ramo. Se arma con JS (buildIntroCars) para
-         no repetir 6 bloques casi idénticos a mano. -->
     <div id="intro-overlay"></div>
 
-    <!-- ===== NUEVO CONTENEDOR PARA POSICIONAR EL RAMO ===== -->
     <div class="ramo-container">
         <div class="flowers">
           
           <!-- IMAGEN DEL ENVOLTORIO AÑADIDA -->
           <div class="flower-wrapping"></div>
     
-          <!-- TALLOS TRASEROS (el --7, centrado y mas corto, se saco: con
-               el --2 mas alto de los tallos medios delante y en la misma
-               posicion central, quedaba tapado por completo) -->
           <div class="head-stem head-stem--6"><div class="flower__line"><div class="head-stem__image"></div></div></div>
           <div class="head-stem head-stem--8"><div class="flower__line"><div class="head-stem__image"></div></div></div>
     
@@ -639,10 +521,6 @@
           <div class="head-stem head-stem--4"><div class="flower__line"><div class="head-stem__image"></div></div></div>
           <div class="head-stem head-stem--5"><div class="flower__line"><div class="head-stem__image"></div></div></div>
     
-          <!-- MARGARITAS AZULES: 12, armadas por JS (buildFlowers, ver
-               script al final) e insertadas justo aquí (antes de la
-               hierba) para que se intercalen visualmente con los tallos
-               de arriba en vez de quedar todas al frente. -->
           <div id="flowers-mount"></div>
 
           <!-- CÓDIGO RESTANTE DE LA HIERBA -->
@@ -660,9 +538,6 @@
 
     <!-- DEDICA:CONFIG -->
     <script>
-        /* ════════════════════════════════════════════════════════════════
-           ██  CAMPOS EDITABLES (schema.json)  ██
-           ═════════════════════════════════════════════════════════════ */
         const DEFAULTS = {
             titulo: "Feliz Día mi amor 🚗",
             galeria: ["assets/card1.jpg", "assets/card2.jpg", "assets/card3.jpg"],
