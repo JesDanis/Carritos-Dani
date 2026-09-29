@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- DEDICA:META -->
+    <title>Dani 💙🚙</title>
+    <meta name="description" content="Un ramo azul de Hot Wheels cuyos tallos rematan en autitos estilizados - toca uno para revelar una tarjeta con foto y frase. Empieza con autitos volando con su propulsor a reacción.">
+    <!-- DEDICA:PRELOAD -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌼</text></svg>">
+    <!-- Fuente de letra actualizada -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+<style>
+    /* --- MÓDULO DE COLORES EDITABLES --- */
+    :root {
+        --color-petalo-principal: #45c8ff;
+        --color-petalo-gradiente: #1a8fd1;
+        --color-petalo-neon: rgba(69, 200, 255, 0.6);
+        --color-centro-flor: #0d2450;
+        --color-centro-flor-sombra: #050f28;
+        --color-calyx: #2f7a3a;
+        --color-calyx-sombra: #1c4a22;
+        --color-luz-particula-1: #54c5ff;
+        --color-luz-particula-2: #ffffff;
+        --color-tallo-principal: #064600;
+        --color-tallo-hoja: #004b1f;
+        --color-pasto-brillante: #55a630;
+        --color-sombra-hojas: rgba(27, 0, 35, 0.2);
+        --color-luz-hojas: rgba(255, 255, 255, 0.2);
+        --color-fondo-oscuro: #0505056e;
+        --color-superposicion-fondo: rgba(8, 0, 18, 0.93);
+        --color-titulo: #00aaff;
+        --color-titulo-neon: rgba(20, 180, 255, 0.75);
+        --color-sombra-titulo: rgba(0, 0, 0, 0.321);
+        --color-overlay-glow: rgba(40, 170, 255, 0.8);
+        --color-overlay-title: #ffffff;
+        --color-overlay-title-neon: rgba(255, 255, 255, 0.7);
+    }
+
+    *,
+    *::after,
+    *::before {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: var(--color-fondo-oscuro);
+        overflow: hidden;
+        perspective: 1000px;
+        font-family: 'Sour Gummy', sans-serif;
+        position: relative;
+        z-index: 1;
+        /* ===== NUEVO: BLOQUEA LA SELECCIÓN DE TEXTO Y ELEMENTOS ===== */
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10+ y Edge */
+        user-select: none; /* Sintaxis estándar */
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('assets/back1.png');
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+        filter: blur(2px);
+        z-index: -2;
+    }
+
+    .title-container {
+        position: absolute;
+        top: 8%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        width: 90%;
+        max-width: 1500px;
+        opacity: 0;
+        transition: opacity 1.2s ease-in-out 0.5s;
+    }
+
+    .main-title {
+        color: var(--color-titulo);
+        font-size: clamp(2.1rem, 6.5vw, 3.8rem);
+        text-shadow: 0 0 8px rgba(9, 0, 25, 0.6), 0 0 16px var(--color-titulo-neon), 0 0 28px var(--color-titulo-neon), 0 0 42px var(--color-titulo-neon), 2px 2px 6px var(--color-sombra-titulo);
+        text-align: center;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .night {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--color-superposicion-fondo);
+        z-index: -1;
+    }
+
+    /* Campo de estrellas: puntos fijos que titilan, distinto del sistema de
+       partículas que ya existia (esas flotan hacia arriba desde abajo, no
+       dan un efecto de "cielo"). Siempre detrás del ramo (mismo z-index que
+       .night, pero despues en el DOM asi pinta encima de ella). */
+    #star-field { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .star { position: absolute; border-radius: 50%; background: #fff; animation-name: star-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+    @keyframes star-twinkle { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+
+    /* Autitos de fondo: cruzan la pantalla en diagonal, lento, en bucle
+       continuo (a diferencia de los de la intro, que vuelan una sola vez) -
+       mas chicos, mas tenues, y siempre detrás de la envoltura/tallos/flores
+       (mismo z-index que .night/.star-field, pintados despues de esas dos
+       asi quedan encima del cielo pero por detras de cualquier elemento del
+       ramo, que empieza en z-index:0). Pausados igual que el resto del ramo
+       hasta el primer toque (no llevan la excepcion que sí tiene
+       #intro-overlay), asi que "en todo momento" significa "mientras el
+       ramo esta a la vista", no durante la pantalla de inicio. */
+    #bg-cars { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .bg-car { position: absolute; width: 27vmin; opacity: 0; animation-timing-function: linear; animation-iteration-count: infinite; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .4)); }
+    .bg-car img { display: block; width: 100%; height: auto; }
+    .bg-car--dr { animation-name: bgfly-dr; }
+    .bg-car--dl { animation-name: bgfly-dl; }
+    /* Trayecto mas plano que antes (18vh de caida en vez de 150vh - casi
+       horizontal, con solo una leve inclinacion hacia abajo) a pedido
+       explicito: "no tan en diagonal, un poco mas recto". */
+    @keyframes bgfly-dr { 0% { transform: translate(-25vw, 0vh) rotate(6deg); opacity: 0; } 8% { opacity: .85; } 92% { opacity: .85; } 100% { transform: translate(125vw, 18vh) rotate(6deg); opacity: 0; } }
+    @keyframes bgfly-dl { 0% { transform: translate(125vw, 0vh) rotate(-6deg); opacity: 0; } 8% { opacity: .85; } 92% { opacity: .85; } 100% { transform: translate(-25vw, 18vh) rotate(-6deg); opacity: 0; } }
+    /* Mismo propulsor de particulas que los autitos de la intro, mas chico
+       (acorde al tamaño reducido de estos autos de fondo). */
+    .bg-car .thruster { width: 8vmin; height: 4vmin; }
+    .bg-car--dr .thruster { left: -6.5vmin; }
+    .bg-car--dl .thruster { right: -6.5vmin; }
+    .bg-car--dr .thruster-particle { right: 0; animation-name: thrust-stream-left; }
+    .bg-car--dl .thruster-particle { left: 0; animation-name: thrust-stream-right; }
+
+    .flowers {
+        position: relative;
+        transform: scale(0.9);
+    }
+
+    .flower {
+        position: absolute;
+        bottom: 10vmin;
+        transform-origin: bottom center;
+        will-change: transform;
+        z-index: 10;
+        --fl-speed: 0.8s;
+    }
+
+    .head-stem {
+        position: absolute;
+        bottom: 10vmin;
+        transform-origin: bottom center;
+        will-change: transform;
+    }
+
+    .head-stem__image {
+        width: 35vmin;
+        height: 35vmin;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        cursor: pointer;
+        z-index: 11;
+    }
+
+    /* Contenedor de las flores: con su propio position+z-index (no solo
+       las flores adentro) crea su PROPIO contexto de apilamiento, así queda
+       garantizado por DEBAJO de TODOS los tallos de una sola vez (que llegan
+       hasta z:8) sin depender de que cada z-index individual de cada flor
+       "se escape" y termine compitiendo directo contra los tallos - los
+       hotwheels y sus tallos van siempre encima de las flores, a propósito
+       (pedido explícito: "los hotwheels y sus tallos superpuestos a las
+       flores"). z-index:0 los deja empatados con .flower-wrapping, por
+       debajo de cualquier tallo (el más bajo es z:1). */
+    #flowers-mount { position: relative; z-index: 0; }
+
+    /* --- ESTILO PARA EL ENVOLTORIO --- */
+    .flower-wrapping {
+        position: absolute;
+        bottom: -5vmin;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150vmin;
+        height: 130vmin;
+        background-image: url('assets/ramo1.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: bottom center;
+        z-index: 0;
+        filter: drop-shadow(0 0 3vmin rgba(69, 200, 255, 0.9)) drop-shadow(0 0 7vmin rgba(69, 200, 255, 0.65)) drop-shadow(0 0 12vmin rgba(69, 200, 255, 0.4));
+    }
+
+    /*
+        =============================================
+        PANEL DE CONTROL PARA TODOS LOS TALLOS
+        =============================================
+    */
+    /* TALLOS DE AUTOS: ahora en la base (cortos) - antes eran los más altos,
+       intercambiados de posición con las margaritas a pedido explícito
+       ("las flores en la parte más alta, los hotwheels abajo en la base").
+       Los nombres de las clases (--6/7/8 "traseros", etc.) ya no describen
+       su altura real, se dejan igual para no reescribir el HTML que las usa. */
+    .head-stem--6 { --h: 45vmin; --d: 0s; left: 50%; animation: sway-left-car-wide 5.5s linear infinite; z-index: 1; }
+    .head-stem--8 { --h: 47vmin; --d: 0s; left: 50%; animation: sway-right-car-wide 5.2s linear infinite; z-index: 1; }
+    .head-stem--1 { --h: 54vmin; --d: 0s; left: 50%; animation: sway-left-20 5s linear infinite; z-index: 5; }
+    .head-stem--2 { --h: 82vmin; --d: 0s; left: 50%; animation: sway-center 5.8s linear infinite; z-index: 5; }
+    .head-stem--3 { --h: 51vmin; --d: 0s; left: 50%; animation: sway-right-20 4.8s linear infinite; z-index: 5; }
+    .head-stem--4 { --h: 43vmin; --d: 0s; left: 50%; animation: sway-left-10 5.2s linear infinite; z-index: 8; }
+    .head-stem--5 { --h: 41vmin; --d: 0s; left: 50%; animation: sway-right-10 5s linear infinite; z-index: 8; }
+    /* MARGARITAS AZULES: 12 en total, armadas por JS (ver buildFlowers() al
+       final del archivo) en vez de escritas a mano - con 2 capas de pétalos
+       cada una (24 divs por flor) habría sido demasiado HTML repetido. Sus
+       posiciones/z-index/altura se definen en FLOWER_SLOTS, intercaladas
+       entre los 3 niveles de tallos de arriba (z:1 atrás, z:5 medio, z:8
+       intermedio) en vez de quedar todas juntas al frente como antes. */
+
+    /*
+        =============================================
+        LÓGICA INTERNA (NO TOCAR)
+        =============================================
+    */
+    .head-stem .flower__line, .flower .flower__line { height: var(--h); animation-delay: var(--d); }
+    /* Selectores agrupados (antes 3 reglas separadas para head1 y 2 para head4,
+       cada una con su propia ruta de imagen repetida - generar-html-entrega.mjs
+       embebe cada ocurrencia por separado, asi que triplicaba/duplicaba el peso
+       de estas imagenes en el HTML de entrega sin ningun cambio visual). */
+    .head-stem--1 .head-stem__image, .head-stem--5 .head-stem__image, .head-stem--6 .head-stem__image { background-image: url('assets/head1.png'); }
+    .head-stem--2 .head-stem__image { background-image: url('assets/head2.png'); }
+    .head-stem--3 .head-stem__image { background-image: url('assets/head3.png'); }
+    .head-stem--4 .head-stem__image, .head-stem--8 .head-stem__image { background-image: url('assets/head4.png'); }
+    /* Hotwheels de los extremos: mas grandes que el resto (35vmin base) y
+       con mas espacio para lucirse, pedido explicito ("sobra espacio"). */
+    .head-stem--6 .head-stem__image, .head-stem--8 .head-stem__image { width: 43vmin; height: 43vmin; }
+    .head-stem--2 .head-stem__image { width: 30vmin; height: 30vmin; }
+
+    /* ... (El resto de tus estilos CSS van aquí, no es necesario copiarlos todos de nuevo)... */
+
+    /* z-index explícito: sin esto, .flower__line (el tallo verde, que viene
+       DESPUÉS en el HTML) pintaba por encima de .flower__leafs (la cabeza
+       con los pétalos) cada vez que se cruzaban en pantalla - ninguno de
+       los dos tenía z-index propio, así que ganaba el orden del DOM, no la
+       cabeza de la flor. Se notaba sobre todo durante la animación de
+       aparición (el tallo creciendo por detrás/encima de la flor todavía
+       floreciendo). */
+    .flower__leafs { position: relative; z-index: 2; animation: blooming-flower 2s backwards; will-change: transform; filter: drop-shadow(0 0 2.5vmin rgba(69, 200, 255, 1)) drop-shadow(0 0 6vmin rgba(69, 200, 255, 0.8)) drop-shadow(0 0 10vmin rgba(69, 200, 255, 0.5)); }
+    .flower__leafs::after { content: ""; position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); width: 12vmin; height: 12vmin; background-color: var(--color-petalo-neon); filter: blur(11vmin); }
+    /* MODELO DE FLOR: margarita grande de doble capa - una capa exterior de
+       14 pétalos largos y una interior de 13 pétalos más cortos, rotada a
+       la mitad de paso (para que no queden pegados exactamente encima de
+       los de afuera, como una margarita real), mucho más grandes que la
+       version anterior. El cáliz (disco verde en la base) tapa la unión con
+       el tallo, que antes quedaba expuesta. */
+    .flower__calyx { position: absolute; bottom: -1.5vmin; left: 50%; margin-left: -4.5vmin; width: 9vmin; height: 7vmin; border-radius: 50% 50% 40% 40%; background-image: radial-gradient(circle at 50% 30%, var(--color-calyx), var(--color-calyx-sombra) 80%); z-index: 0; }
+    .flower__leaf { position: absolute; bottom: 0; left: 50%; background-image: linear-gradient(to top, var(--color-petalo-gradiente), var(--color-petalo-principal)); transform-origin: bottom center; opacity: 0.97; box-shadow: inset 0 0 1.6vmin rgba(255, 255, 255, 0.6); z-index: 1; }
+    .flower__leaf--outer { width: 5vmin; height: 25vmin; margin-left: -2.5vmin; border-radius: 50% 50% 45% 45%/70% 70% 30% 30%; }
+    .flower__leaf--inner { width: 3.6vmin; height: 18vmin; margin-left: -1.8vmin; border-radius: 50% 50% 45% 45%/70% 70% 30% 30%; opacity: 0.92; }
+    .flower__white-circle { position: absolute; left: 50%; top: 0; margin-left: -4vmin; margin-top: -4vmin; width: 8vmin; height: 8vmin; border-radius: 50%; background-image: radial-gradient(circle at 38% 32%, #6fa8e8, var(--color-centro-flor) 55%, var(--color-centro-flor-sombra) 100%); box-shadow: inset 0 0 1.6vmin rgba(0, 10, 40, 0.45); z-index: 2; }
+    .flower__white-circle::after { content: ""; position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: 62%; height: 62%; border-radius: inherit; background-image: repeating-radial-gradient(circle, rgba(0, 10, 40, 0.22) 0, rgba(0, 10, 40, 0.22) .3vmin, transparent .3vmin, transparent .8vmin); }
+    /* SEGUNDO TIPO DE FLOR ("clásica"): el diseño original de 4 pétalos
+       anchos tipo rosa, de antes de que este ramo se rediseñara a
+       margaritas - se reincorpora intercalado con las margaritas (ver
+       FLOWER_SLOTS más abajo), mismos colores/cáliz que la margarita, para
+       que el ramo tenga variedad de formas en vez de una sola repetida. */
+    .flower__leaf--classic { position: absolute; bottom: 0; left: 50%; width: 8vmin; height: 11vmin; border-radius: 51% 49% 47% 53%/44% 45% 55% 69%; background-image: linear-gradient(to top, var(--color-petalo-gradiente), var(--color-petalo-principal)); transform-origin: bottom center; opacity: 0.9; box-shadow: inset 0 0 2vmin rgba(255, 255, 255, 0.5); z-index: 1; }
+    .flower__leaf--classic-1 { transform: translate(-10%, 1%) rotateY(40deg) rotateX(-50deg); }
+    .flower__leaf--classic-2 { transform: translate(-50%, -4%) rotateX(40deg); }
+    .flower__leaf--classic-3 { transform: translate(-90%, 0%) rotateY(45deg) rotateX(50deg); }
+    .flower__leaf--classic-4 { width: 8vmin; height: 8vmin; transform-origin: bottom left; border-radius: 4vmin 10vmin 4vmin 4vmin; transform: translate(0%, 18%) rotateX(70deg) rotate(-43deg); opacity: 0.8; }
+    .flower__white-circle--classic { position: absolute; left: -3.5vmin; top: -3vmin; width: 9vmin; height: 4vmin; border-radius: 50%; background-image: radial-gradient(circle at 38% 32%, #6fa8e8, var(--color-centro-flor) 55%, var(--color-centro-flor-sombra) 100%); box-shadow: inset 0 0 1.2vmin rgba(0, 10, 40, 0.4); z-index: 2; }
+    .flower__line { width: 1.5vmin; background-image: linear-gradient(to left, var(--color-sombra-hojas), transparent, var(--color-luz-hojas)), linear-gradient(to top, transparent 10%, var(--color-tallo-principal), var(--color-tallo-principal)); box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5); animation: grow-flower-tree 3s backwards; transform-origin: bottom center; will-change: transform; position: relative; }
+    .flower__line__leaf { --w: 7vmin; --h: calc(var(--w) + 2vmin); position: absolute; top: 20%; left: 90%; width: var(--w); height: var(--h); border-top-right-radius: var(--h); border-bottom-left-radius: var(--h); background-image: linear-gradient(to top, rgba(20, 122, 20, 0.4), var(--color-tallo-hoja)); }
+    .flower__line__leaf--1 { transform: rotate(70deg) rotateY(30deg); animation: blooming-leaf-right var(--fl-speed) 1.6s backwards; }
+    .flower__line__leaf--2 { top: 45%; transform: rotate(70deg) rotateY(30deg); animation: blooming-leaf-right var(--fl-speed) 1.4s backwards; }
+    .flower__line__leaf--3, .flower__line__leaf--4, .flower__line__leaf--6 { border-top-right-radius: 0; border-bottom-left-radius: 0; border-top-left-radius: var(--h); border-bottom-right-radius: var(--h); left: -460%; top: 12%; transform: rotate(-70deg) rotateY(30deg); }
+    .flower__line__leaf--3 { animation: blooming-leaf-left var(--fl-speed) 1.2s backwards; }
+    .flower__line__leaf--4 { top: 40%; animation: blooming-leaf-left var(--fl-speed) 1s backwards; }
+    .flower__line__leaf--5 { top: 0; transform-origin: left; transform: rotate(70deg) rotateY(30deg) scale(0.6); animation: blooming-leaf-right var(--fl-speed) 1.8s backwards; }
+    .flower__line__leaf--6 { top: -2%; left: -450%; transform-origin: right; transform: rotate(-70deg) rotateY(30deg) scale(0.6); animation: blooming-leaf-left var(--fl-speed) 2s backwards; }
+    .flower__light { position: absolute; bottom: 0vmin; width: 1vmin; height: 1vmin; background-color: var(--color-luz-particula-1); border-radius: 50%; filter: blur(0.2vmin); animation: light-ans 4s linear infinite backwards; }
+    .flower__light:nth-child(odd) { background-color: var(--color-luz-particula-2); }
+    .flower__light--1 { left: -2vmin; animation-delay: 1s; }
+    .flower__light--2 { left: 3vmin; animation-delay: 0.5s; }
+    .flower__light--3 { left: -6vmin; animation-delay: 0.3s; }
+    .flower__light--4 { left: 6vmin; animation-delay: 0.9s; }
+    .flower__light--5 { left: -1vmin; animation-delay: 1.5s; }
+    .flower__light--6 { left: -4vmin; animation-delay: 3s; }
+    .flower__light--7 { left: 3vmin; animation-delay: 2s; }
+    .flower__light--8 { left: -6vmin; animation-delay: 3.5s; }
+    .flower__grass { --c: var(--color-pasto-brillante); --line-w: 1.5vmin; position: absolute; bottom: 12vmin; left: -7vmin; display: flex; flex-direction: column; align-items: flex-end; z-index: 20; transform-origin: bottom center; transform: rotate(-48deg) rotateY(40deg) }
+    .flower__grass--1 { animation: moving-grass 2s linear infinite }
+    .flower__grass--2 { left: 2vmin; bottom: 10vmin; transform: scale(.5) rotate(75deg) rotateX(10deg) rotateY(-200deg); opacity: .8; z-index: 0; animation: moving-grass--2 1.5s linear infinite }
+    .flower__grass--top { width: 7vmin; height: 10vmin; border-top-right-radius: 100%; border-right: var(--line-w) solid var(--c); transform-origin: bottom center; transform: rotate(-2deg) }
+    .flower__grass--bottom { margin-top: -2px; width: var(--line-w); height: 25vmin; background-image: linear-gradient(to top, transparent, var(--c)) }
+    .flower__grass__leaf { --size: 10vmin; position: absolute; width: calc(var(--size) * 2.1); height: var(--size); border-top-left-radius: var(--size); border-top-right-radius: var(--size); background-image: linear-gradient(to top, transparent, transparent 30%, var(--c)); z-index: 100 }
+    .flower__grass__leaf--1 { top: -6%; left: 30%; --size: 6vmin; transform: rotate(-20deg); animation: growing-grass-ans--1 2s 2.6s backwards }
+    .flower__grass__leaf--2 { top: -5%; left: -110%; --size: 6vmin; transform: rotate(10deg); animation: growing-grass-ans--2 2s 2.4s linear backwards }
+    .flower__grass__leaf--3 { top: 5%; left: 60%; --size: 8vmin; transform: rotate(-18deg) rotateX(-20deg); animation: growing-grass-ans--3 2s 2.2s linear backwards }
+    .flower__grass__leaf--4 { top: 6%; left: -135%; --size: 8vmin; transform: rotate(2deg); animation: growing-grass-ans--4 2s 2s linear backwards }
+    .flower__grass__leaf--5 { top: 20%; left: 60%; --size: 10vmin; transform: rotate(-24deg) rotateX(-20deg); animation: growing-grass-ans--5 2s 1.8s linear backwards }
+    .flower__grass__leaf--6 { top: 22%; left: -180%; --size: 10vmin; transform: rotate(10deg); animation: growing-grass-ans--6 2s 1.6s linear backwards }
+    .flower__grass__leaf--7 { top: 39%; left: 70%; --size: 10vmin; transform: rotate(-10deg); animation: growing-grass-ans--7 2s 1.4s linear backwards }
+    .flower__grass__leaf--8 { top: 40%; left: -215%; --size: 11vmin; transform: rotate(10deg); animation: growing-grass-ans--8 2s 1.2s linear backwards }
+    .flower__grass__overlay { position: absolute; top: -10%; right: 0%; width: 100%; height: 100%; background-color: rgba(0, 0, 0, .6); filter: blur(1.5vmin); z-index: 100 }
+    .flower__g-long { --w: 2vmin; --h: 6vmin; --c: var(--color-tallo-hoja); position: absolute; bottom: 10vmin; left: -3vmin; transform-origin: bottom center; transform: rotate(-30deg) rotateY(-20deg); display: flex; flex-direction: column; align-items: flex-end; animation: flower-g-long-ans 3s linear infinite }
+    .flower__g-long__top { top: calc(var(--h) * -1); width: calc(var(--w) + 1vmin); height: var(--h); border-top-right-radius: 100%; border-right: .7vmin solid var(--c); transform: translate(-.7vmin, 1vmin) }
+    .flower__g-long__bottom { width: var(--w); height: 50vmin; transform-origin: bottom center; background-image: linear-gradient(to top, transparent 30%, var(--c)); box-shadow: inset 0 0 2px rgba(0, 0, 0, .5); clip-path: polygon(35% 0, 65% 1%, 100% 100%, 0% 100%) }
+    .flower__g-right { position: absolute; bottom: 6vmin; left: -2vmin; transform-origin: bottom left; transform: rotate(20deg) }
+    .flower__g-right .leaf { width: 30vmin; height: 50vmin; border-top-left-radius: 100%; border-left: 2vmin solid var(--color-pasto-brillante); background-image: linear-gradient(to bottom, transparent, var(--color-fondo-oscuro) 60%); -webkit-mask-image: linear-gradient(to top, transparent 30%, var(--color-pasto-brillante) 60%) }
+    .flower__g-right--1 { animation: flower-g-right-ans 2.5s linear infinite }
+    .flower__g-right--2 { left: 5vmin; transform: rotateY(-180deg); animation: flower-g-right-ans--2 3s linear infinite }
+    .flower__g-right--2 .leaf { height: 75vmin; filter: blur(.3vmin); opacity: .8 }
+    .flower__g-front { position: absolute; bottom: 6vmin; left: 2.5vmin; z-index: 100; transform-origin: bottom center; transform: rotate(-28deg) rotateY(30deg) scale(1.04); animation: flower__g-front-ans 2s linear infinite }
+    .flower__g-front__line { width: .3vmin; height: 20vmin; background-image: linear-gradient(to top, transparent, var(--color-pasto-brillante), transparent 100%); position: relative }
+    .flower__g-front__leaf-wrapper { position: absolute; top: 0; left: 0; transform-origin: bottom left; transform: rotate(10deg) }
+    .flower__g-front__leaf-wrapper:nth-child(even) { left: 0vmin; transform: rotateY(-180deg) rotate(5deg); animation: flower__g-front__leaf-left-ans 1s ease-in backwards }
+    .flower__g-front__leaf-wrapper:nth-child(odd) { animation: flower__g-front__leaf-ans 1s ease-in backwards }
+    .flower__g-front__leaf-wrapper--1 { top: -8vmin; transform: scale(.7); animation: flower__g-front__leaf-ans 1s 5.5s ease-in backwards !important }
+    .flower__g-front__leaf-wrapper--2 { top: -8vmin; transform: rotateY(-180deg) scale(.7) !important; animation: flower__g-front__leaf-left-ans-2 1s 4.6s ease-in backwards !important }
+    .flower__g-front__leaf-wrapper--3 { top: -3vmin; animation: flower__g-front__leaf-ans 1s 4.6s ease-in backwards }
+    .flower__g-front__leaf-wrapper--4 { top: -3vmin; transform: rotateY(-180deg) scale(.9) !important; animation: flower__g-front__leaf-left-ans-2 1s 4.6s ease-in backwards !important }
+    .flower__g-front__leaf-wrapper--5, .flower__g-front__leaf-wrapper--6 { top: 2vmin }
+    .flower__g-front__leaf-wrapper--7, .flower__g-front__leaf-wrapper--8 { top: 6.5vmin }
+    .flower__g-front__leaf-wrapper--2 { animation-delay: 5.2s !important }
+    .flower__g-front__leaf-wrapper--3 { animation-delay: 4.9s !important }
+    .flower__g-front__leaf-wrapper--5 { animation-delay: 4.3s !important }
+    .flower__g-front__leaf-wrapper--6 { animation-delay: 4.1s !important }
+    .flower__g-front__leaf-wrapper--7 { animation-delay: 3.8s !important }
+    .flower__g-front__leaf-wrapper--8 { animation-delay: 3.5s !important }
+    .flower__g-front__leaf { width: 10vmin; height: 10vmin; border-radius: 100% 0% 0% 100%/100% 100% 0% 0%; box-shadow: inset 0 2px 1vmin hsla(184, 97%, 58%, .2); background-image: linear-gradient(to bottom left, transparent, var(--color-fondo-oscuro)), linear-gradient(to bottom right, var(--color-pasto-brillante) 50%, transparent 50%, transparent); -webkit-mask-image: linear-gradient(to bottom right, var(--color-pasto-brillante) 50%, transparent 50%, transparent); mask-image: linear-gradient(to bottom right, var(--color-pasto-brillante) 50%, transparent 50%, transparent) }
+    .flower__g-fr { position: absolute; bottom: -4vmin; left: vmin; transform-origin: bottom left; z-index: 10; animation: flower__g-fr-ans 2s linear infinite }
+    .flower__g-fr .leaf { width: 30vmin; height: 50vmin; border-top-left-radius: 100%; border-left: 2vmin solid var(--color-pasto-brillante); -webkit-mask-image: linear-gradient(to top, transparent 25%, var(--color-pasto-brillante) 50%); position: relative; z-index: 1 }
+    .flower__g-fr__leaf { position: absolute; top: 0; left: 0; width: 10vmin; height: 10vmin; border-radius: 100% 0% 0% 100%/100% 100% 0% 0%; box-shadow: inset 0 2px 1vmin hsla(184, 97%, 58%, .2); background-image: linear-gradient(to bottom left, transparent, var(--color-fondo-oscuro) 98%), linear-gradient(to bottom right, var(--color-pasto-brillante) 45%, transparent 50%, transparent); -webkit-mask-image: linear-gradient(135deg, var(--color-pasto-brillante) 40%, transparent 50%, transparent) }
+    .flower__g-fr__leaf--1 { left: 20vmin; transform: rotate(45deg); animation: flower__g-fr-leaft-ans-1 .5s 5.2s linear backwards }
+    .flower__g-fr__leaf--2 { left: 12vmin; top: -7vmin; transform: rotate(25deg) rotateY(-180deg); animation: flower__g-fr-leaft-ans-6 .5s 5s linear backwards }
+    .flower__g-fr__leaf--3 { left: 15vmin; top: 6vmin; transform: rotate(55deg); animation: flower__g-fr-leaft-ans-5 .5s 4.8s linear backwards }
+    .flower__g-fr__leaf--4 { left: 6vmin; top: -2vmin; transform: rotate(25deg) rotateY(-180deg); animation: flower__g-fr-leaft-ans-6 .5s 4.6s linear backwards }
+    .flower__g-fr__leaf--5 { left: 10vmin; top: 14vmin; transform: rotate(55deg); animation: flower__g-fr-leaft-ans-5 .5s 4.4s linear backwards }
+    .flower__g-fr__leaf--6 { left: 0vmin; top: 6vmin; transform: rotate(25deg) rotateY(-180deg); animation: flower__g-fr-leaft-ans-6 .5s 4.2s linear backwards }
+    .flower__g-fr__leaf--7 { left: 5vmin; top: 22vmin; transform: rotate(45deg); animation: flower__g-fr-leaft-ans-7 .5s 4s linear backwards }
+    .flower__g-fr__leaf--8 { left: -4vmin; top: 15vmin; transform: rotate(15deg) rotateY(-180deg); animation: flower__g-fr-leaft-ans-8 .5s 3.8s linear backwards }
+    .long-g { position: absolute; bottom: 25vmin; left: -42vmin; transform-origin: bottom left }
+    .long-g--1 { bottom: 0vmin; transform: scale(.8) rotate(-5deg) }
+    .long-g--1 .leaf { -webkit-mask-image: linear-gradient(to top, transparent 40%, var(--color-pasto-brillante) 80%) !important }
+    .long-g--1 .leaf--1 { --w: 5vmin; --h: 60vmin; left: -2vmin; transform: rotate(3deg) rotateY(-180deg) }
+    .long-g--2, .long-g--3 { bottom: -3vmin; left: -35vmin; transform-origin: center; transform: scale(.6) rotateX(60deg) }
+    .long-g--2 .leaf, .long-g--3 .leaf { -webkit-mask-image: linear-gradient(to top, transparent 50%, var(--color-pasto-brillante) 80%) !important }
+    .long-g--2 .leaf--1, .long-g--3 .leaf--1 { left: -1vmin; transform: rotateY(-180deg) }
+    .long-g--3 { left: -17vmin; bottom: 0vmin }
+    .long-g--3 .leaf { -webkit-mask-image: linear-gradient(to top, transparent 40%, var(--color-pasto-brillante) 80%) !important }
+    .long-g--4 { left: 25vmin; bottom: -3vmin; transform-origin: center; transform: scale(.6) rotateX(60deg) }
+    .long-g--4 .leaf { -webkit-mask-image: linear-gradient(to top, transparent 50%, var(--color-pasto-brillante) 80%) !important }
+    .long-g--5 { left: 42vmin; bottom: 0vmin; transform: scale(.8) rotate(2deg) }
+    .long-g--6 { left: 0vmin; bottom: -20vmin; z-index: 100; filter: blur(.3vmin); transform: scale(.8) rotate(2deg) }
+    .long-g--7 { left: 35vmin; bottom: 20vmin; z-index: -1; filter: blur(.3vmin); transform: scale(.6) rotate(2deg); opacity: .7 }
+    .long-g .leaf { --w: 15vmin; --h: 40vmin; --c: var(--color-tallo-hoja); position: absolute; bottom: 0; width: var(--w); height: var(--h); border-top-left-radius: 100%; border-left: 2vmin solid var(--c); -webkit-mask-image: linear-gradient(to top, transparent 20%, var(--color-fondo-oscuro)); transform-origin: bottom center }
+    .long-g .leaf--0 { left: 2vmin; animation: leaf-ans-1 4s linear infinite }
+    .long-g .leaf--1 { --w: 5vmin; --h: 60vmin; animation: leaf-ans-1 4s linear infinite }
+    .long-g .leaf--2 { --w: 10vmin; --h: 40vmin; left: -.5vmin; bottom: 5vmin; transform-origin: bottom left; transform: rotateY(-180deg); animation: leaf-ans-2 3s linear infinite }
+    .long-g .leaf--3 { --w: 5vmin; --h: 30vmin; left: -1vmin; bottom: 3.2vmin; transform-origin: bottom left; transform: rotate(-10deg) rotateY(-180deg); animation: leaf-ans-3 3s linear infinite }
+    .grow-ans { animation: grow-ans 2s var(--d) backwards }
+    .growing-grass { animation: growing-grass-ans 1s 2s backwards }
+    .container * { animation-play-state: paused !important }
+    /* Excepcion a la regla de arriba: los autitos de la intro SI deben
+       animar mientras "container" sigue puesto en el body (eso es
+       justamente lo que mantiene el ramo pausado/invisible durante la
+       intro) - un selector con ID pesa mas que ".container *" aunque los
+       dos tengan !important, asi que esta regla gana. */
+    .container #intro-overlay, .container #intro-overlay * { animation-play-state: running !important }
+    @media (max-width:600px) { .flowers { transform: scale(.7); bottom: 5vh; } .title-container { flex-direction: column; gap: 10px; top: 3%; justify-content: center; align-items: center } }
+    @keyframes grow-ans { 0% { transform: scale(0); opacity: 0 } }
+    @keyframes growing-grass-ans { 0% { transform: scale(0) } }
+    @keyframes light-ans { 0% { opacity: 0; transform: translateY(0vmin) } 25% { opacity: 1; transform: translateY(-5vmin) translateX(-2vmin) } 50% { opacity: 1; transform: translateY(-15vmin) translateX(2vmin); filter: blur(.2vmin) } 75% { transform: translateY(-20vmin) translateX(-2vmin); filter: blur(.2vmin) } 100% { transform: translateY(-30vmin); opacity: 0; filter: blur(1vmin) } }
+    @keyframes sway-center { 0%, 100% { transform: rotate(2deg); } 50% { transform: rotate(-2deg); } }
+    @keyframes sway-left-10 { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(-12deg); } }
+    @keyframes sway-left-20 { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(-22deg); } }
+    @keyframes sway-left-30 { 0%, 100% { transform: rotate(-22deg); } 50% { transform: rotate(-15deg); } }
+    @keyframes sway-left-35 { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(-15deg); } }
+    /* Solo para los hotwheels de las puntas (--6/--8) - separado de
+       sway-left-35/right-35 de arriba a proposito: esas dos las usan
+       TAMBIEN un par de flores (FLOWER_SLOTS), y un ajuste de angulo
+       pedido solo para los hotwheels no debe abrir de mas esas flores. */
+    @keyframes sway-left-car-wide { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(-38deg); } }
+    @keyframes sway-right-10 { 0%, 100% { transform: rotate(8deg); } 50% { transform: rotate(12deg); } }
+    @keyframes sway-right-20 { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(22deg); } }
+    @keyframes sway-right-30 { 0%, 100% { transform: rotate(22deg); } 50% { transform: rotate(22deg); } }
+    @keyframes sway-right-35 { 0%, 100% { transform: rotate(10deg); } 50% { transform: rotate(15deg); } }
+    @keyframes sway-right-car-wide { 0%, 100% { transform: rotate(30deg); } 50% { transform: rotate(38deg); } }
+    @keyframes blooming-leaf-right { 0% { transform-origin: left; transform: rotate(70deg) rotateY(30deg) scale(0) } }
+    @keyframes blooming-leaf-left { 0% { transform-origin: right; transform: rotate(-70deg) rotateY(30deg) scale(0) } }
+    /* transform:scaleY en vez de animar height directo (antes 0%{height:0}
+       interpolando hasta el var(--h) de la regla de arriba): height fuerza
+       un reflow de layout en CADA frame, para las 8 flores a la vez
+       (mismo momento en que otros ~250 elementos empiezan a animar al
+       revelar el ramo) - eso es lo que trababa el navegador justo al tocar
+       "abrir", sobre todo en celulares (reporte real 2026-09-25). scaleY
+       con transform-origin:bottom da el mismo resultado visual (los hijos
+       del tallo estan posicionados en % de su altura, que ya queda fija en
+       var(--h) - escalar el contenedor entero los mueve proporcional e
+       identico a como se veian con el height animado) pero corre en el
+       compositor/GPU, sin tocar layout. */
+    @keyframes grow-flower-tree { 0% { transform: scaleY(0); border-radius: 1vmin } }
+    @keyframes blooming-flower { 0% { transform: scale(0) } }
+    @keyframes moving-grass { 0%, 100% { transform: rotate(-48deg) rotateY(40deg) } 50% { transform: rotate(-50deg) rotateY(40deg) } }
+    @keyframes moving-grass--2 { 0%, 100% { transform: scale(.5) rotate(75deg) rotateX(10deg) rotateY(-200deg) } 50% { transform: scale(.5) rotate(79deg) rotateX(10deg) rotateY(-200deg) } }
+    @keyframes growing-grass-ans--1 { 0% { transform-origin: bottom left; transform: rotate(-20deg) scale(0) } }
+    @keyframes growing-grass-ans--2 { 0% { transform-origin: bottom right; transform: rotate(10deg) scale(0) } }
+    @keyframes growing-grass-ans--3 { 0% { transform-origin: bottom left; transform: rotate(-18deg) rotateX(-20deg) scale(0) } }
+    @keyframes growing-grass-ans--4 { 0% { transform-origin: bottom right; transform: rotate(2deg) scale(0) } }
+    @keyframes growing-grass-ans--5 { 0% { transform-origin: bottom left; transform: rotate(-24deg) rotateX(-20deg) scale(0) } }
+    @keyframes growing-grass-ans--6 { 0% { transform-origin: bottom right; transform: rotate(10deg) scale(0) } }
+    @keyframes growing-grass-ans--7 { 0% { transform-origin: bottom left; transform: rotate(-10deg) scale(0) } }
+    @keyframes growing-grass-ans--8 { 0% { transform-origin: bottom right; transform: rotate(10deg) scale(0) } }
+    @keyframes flower-g-long-ans { 0%, 100% { transform: rotate(-30deg) rotateY(-20deg) } 50% { transform: rotate(-32deg) rotateY(-20deg) } }
+    @keyframes flower-g-right-ans { 0%, 100% { transform: rotate(20deg) } 50% { transform: rotate(24deg) rotateX(-20deg) } }
+    @keyframes flower-g-right-ans--2 { 0%, 100% { transform: rotateY(-180deg) rotate(0deg) rotateX(-20deg) } 50% { transform: rotateY(-180deg) rotate(6deg) rotateX(-20deg) } }
+    @keyframes flower__g-front-ans { 0%, 100% { transform: rotate(-28deg) rotateY(30deg) scale(1.04) } 50% { transform: rotate(-35deg) rotateY(40deg) scale(1.04) } }
+    @keyframes flower__g-front__leaf-left-ans-2 { 0% { transform: rotateY(-180deg) scale(0) } }
+    @keyframes flower__g-front__leaf-ans { 0% { transform: rotate(10deg) scale(0) } }
+    @keyframes flower__g-front__leaf-left-ans { 0% { transform: rotateY(-180deg) rotate(5deg) scale(0) } }
+    @keyframes flower__g-fr-ans { 0%, 100% { transform: rotate(2deg) } 50% { transform: rotate(4deg) } }
+    @keyframes flower__g-fr-leaft-ans-1 { 0% { transform-origin: left; transform: rotate(45deg) scale(0) } }
+    @keyframes flower__g-fr-leaft-ans-5 { 0% { transform-origin: left; transform: rotate(55deg) scale(0) } }
+    @keyframes flower__g-fr-leaft-ans-6 { 0% { transform-origin: right; transform: rotate(25deg) rotateY(-180deg) scale(0) } }
+    @keyframes flower__g-fr-leaft-ans-7 { 0% { transform-origin: left; transform: rotate(45deg) scale(0) } }
+    @keyframes flower__g-fr-leaft-ans-8 { 0% { transform-origin: right; transform: rotate(15deg) rotateY(-180deg) scale(0) } }
+    @keyframes leaf-ans-1 { 0%, 100% { transform: rotate(-5deg) scale(1) } 50% { transform: rotate(5deg) scale(1.1) } }
+    @keyframes leaf-ans-2 { 0%, 100% { transform: rotateY(-180deg) rotate(5deg) } 50% { transform: rotateY(-180deg) rotate(0deg) scale(1.1) } }
+    @keyframes leaf-ans-3 { 0%, 100% { transform: rotate(-10deg) rotateY(-180deg) } 50% { transform: rotate(-20deg) rotateY(-180deg) } }
+    #audio-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, .85); z-index: 9999; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: opacity .8s ease }
+    .overlay-content { text-align: center; color: var(--color-overlay-title) }
+    .overlay-content h2 { font-size: clamp(2.5rem, 8vw, 3.5rem); margin-bottom: 40px; color: var(--color-overlay-title); text-shadow: 0 0 8px var(--color-overlay-title-neon); font-weight: 400 }
+    .overlay-image { max-width: 350px; width: 100vw; height: auto; animation: heartbeat 1.2s ease-in-out infinite; filter: drop-shadow(0 0 10px var(--color-overlay-glow)) drop-shadow(0 0 25px var(--color-overlay-glow)) }
+    #audio-overlay .overlay-image { animation-play-state: running !important }
+    @keyframes heartbeat { 0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--color-overlay-glow)) } 30% { transform: scale(1.2); filter: drop-shadow(0 0 25px var(--color-overlay-glow)) drop-shadow(0 0 45px var(--color-overlay-glow)) } 40% { transform: scale(1.15) } 60% { transform: scale(1.2); filter: drop-shadow(0 0 25px var(--color-overlay-glow)) drop-shadow(0 0 55px var(--color-overlay-glow)) } 100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--color-overlay-glow)) } }
+    .background-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden }
+    .particle { position: absolute; bottom: 0; width: 6px; height: 6px; background-color: rgba(255, 255, 255, .5); border-radius: 50%; opacity: 0; animation: background-sparkle 25s linear infinite; filter: blur(1px) }
+    @keyframes background-sparkle { 0% { transform: translateY(0) scale(1); opacity: .5 } 50% { opacity: 1 } 100% { transform: translateY(-100vh) scale(1.5); opacity: 0 } }
+    .particle:nth-child(2) { left: 15%; animation-duration: 20s; animation-delay: 2s; width: 3px; height: 3px }
+    .particle:nth-child(3) { left: 80%; animation-duration: 30s; animation-delay: 5s }
+    .particle:nth-child(4) { left: 50%; animation-duration: 18s; animation-delay: 8s; width: 5px; height: 5px }
+    .particle:nth-child(5) { left: 95%; animation-duration: 22s; animation-delay: 1s }
+    .particle:nth-child(6) { left: 5%; animation-duration: 28s; animation-delay: 10s }
+    .particle:nth-child(7) { left: 30%; animation-duration: 19s; animation-delay: 3s }
+    .particle:nth-child(8) { left: 65%; animation-duration: 26s; animation-delay: 6s }
+    .particle:nth-child(9) { left: 40%; animation-duration: 23s; animation-delay: 9s }
+    .particle:nth-child(10) { left: 25%; animation-duration: 32s; animation-delay: 0s }
+    body:not(.container) .title-container { opacity: 1 }
+
+    /* --- ESTILOS NUEVOS PARA LA TARJETA DE AMOR --- */
+    .love-card-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+    }
+
+    .love-card {
+        position: relative;
+        width: 90vw;
+        /* ===== MODIFICADO: Altura de la ventana reducida ===== */
+        height: 70vh; /* Antes era 90vh */
+        max-width: 1200px;
+        max-height: 750px; /* Antes era 800px */
+        background-size: cover;
+        background-position: center;
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0, 179, 255, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        transform: scale(0.9);
+        transition: transform 0.4s ease-in-out;
+    }
+    
+    .love-card-overlay.visible .love-card {
+        transform: scale(1);
+    }
+
+    .love-text {
+        font-family: 'Sour Gummy', sans-serif;
+        color: white;
+        font-size: clamp(2rem, 5vw, 4.5rem);
+        text-align: center;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        font-weight: 400;
+        pointer-events: none; /* Evita que el texto interfiera con el clic en la tarjeta */
+    }
+
+    .love-card .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        font-size: 3rem;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        /* ===== SOMBRA MEJORADA PARA MAYOR VISIBILIDAD ===== */
+        text-shadow: 0px 0px 10px rgba(0, 0, 0, 1), 3px 3px 5px rgba(0, 0, 0, 0.9);
+    }
+    /*
+    ==================================================================
+    ===> PUNTO DE CONTROL DEFINITIVO PARA MOVER EL RAMO
+    ==================================================================
+    Modifica el valor de 'margin-bottom' para cambiar la altura.
+    - Un valor MÁS GRANDE (ej: 15vh) moverá todo MÁS ARRIBA.
+    - Un valor MÁS PEQUEÑO (ej: 0vh) moverá todo MÁS ABAJO.
+    */
+    .ramo-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 3vh; /* <--- AJUSTA ESTE VALOR PARA SUBIR O BAJAR */
+    }
+
+    /* --- INTRO: autitos Hot Wheels volando con su rayo de propulsor detrás,
+       antes de que se despliegue el ramo. Foto real de auto (no el icono
+       estilizado head1-4.png que usan los tallos) - se muestra una sola vez,
+       nunca vuelve a aparecer tras la primera carga. --- */
+    #intro-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9500;
+        overflow: hidden;
+        pointer-events: none;
+        background: radial-gradient(ellipse at center, rgba(0, 40, 90, .35), rgba(0, 0, 0, 0) 70%);
+        opacity: 1;
+        transition: opacity .6s ease;
+    }
+    #intro-overlay.fade-out { opacity: 0; }
+    .intro-car {
+        position: absolute;
+        width: 46vmin;
+        opacity: 0;
+        animation-timing-function: cubic-bezier(.32, .6, .4, 1);
+        animation-fill-mode: forwards;
+    }
+    .intro-car img { display: block; width: 100%; height: auto; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); }
+    /* Propulsor de partículas (reemplaza el emoji de rayo ⚡ de antes): un
+       puñado de puntitos brillantes detrás de cada auto, cada uno con su
+       propio tamaño/retraso (armados por JS, ver buildIntroCars), que se
+       alejan del auto y se apagan en bucle - como el humo/chispas de un
+       cohete, no un simbolo estatico. */
+    .thruster { position: absolute; top: 50%; width: 18vmin; height: 8vmin; pointer-events: none; }
+    .intro-car--ltr .thruster { left: -16vmin; }
+    .intro-car--rtl .thruster { right: -16vmin; }
+    .thruster-particle {
+        position: absolute; top: 50%; border-radius: 50%;
+        background-image: radial-gradient(circle, #eaf6ff 0%, var(--color-luz-particula-1) 45%, rgba(84,197,255,0) 75%);
+        animation-timing-function: linear; animation-iteration-count: infinite;
+    }
+    .intro-car--ltr .thruster-particle { right: 0; animation-name: thrust-stream-left; }
+    .intro-car--rtl .thruster-particle { left: 0; animation-name: thrust-stream-right; }
+    @keyframes thrust-stream-left { 0% { transform: translateY(-50%) translateX(0) scale(1); opacity: .95; } 100% { transform: translateY(-50%) translateX(-13vmin) scale(.15); opacity: 0; } }
+    @keyframes thrust-stream-right { 0% { transform: translateY(-50%) translateX(0) scale(1); opacity: .95; } 100% { transform: translateY(-50%) translateX(13vmin) scale(.15); opacity: 0; } }
+    @keyframes fly-ltr { 0% { transform: translateX(-95vmin); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(150vw); opacity: 1; } }
+    @keyframes fly-rtl { 0% { transform: translateX(95vmin); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(-150vw); opacity: 1; } }
+    .intro-car--ltr { animation-name: fly-ltr; }
+    .intro-car--rtl { animation-name: fly-rtl; }
+</style>
+</head>
+
+<body class="container">
+    
+    <div id="audio-overlay">
+      <div class="overlay-content">
+        <h2 id="overlay-text">Toca para abrir</h2>
+        <img src="assets/log.png" alt="Tocar para iniciar" class="overlay-image" id="overlay-image">
+      </div>
+    </div>
+    
+    <div class="background-particles"></div>
+
+    <audio id="background-music" src="assets/sound.mp3" loop></audio>
+
+    <div class="title-container">
+        <h1 class="main-title" id="titulo-text">Feliz Día mi amor 🚗</h1>
+    </div>
+
+    <div class="night"></div>
+    <div id="star-field"></div>
+    <div id="bg-cars"></div>
+
+    <!-- INTRO: autitos Hot Wheels volando con su rayo de propulsor detrás,
+         antes de que aparezca el ramo. Se arma con JS (buildIntroCars) para
+         no repetir 6 bloques casi idénticos a mano. -->
+    <div id="intro-overlay"></div>
+
+    <!-- ===== NUEVO CONTENEDOR PARA POSICIONAR EL RAMO ===== -->
+    <div class="ramo-container">
+        <div class="flowers">
+          
+          <!-- IMAGEN DEL ENVOLTORIO AÑADIDA -->
+          <div class="flower-wrapping"></div>
+    
+          <!-- TALLOS TRASEROS (el --7, centrado y mas corto, se saco: con
+               el --2 mas alto de los tallos medios delante y en la misma
+               posicion central, quedaba tapado por completo) -->
+          <div class="head-stem head-stem--6"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+          <div class="head-stem head-stem--8"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+    
+          <!-- TALLOS MEDIOS -->
+          <div class="head-stem head-stem--1"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+          <div class="head-stem head-stem--2"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+          <div class="head-stem head-stem--3"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+          
+          <!-- TALLOS INTERMEDIOS -->
+          <div class="head-stem head-stem--4"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+          <div class="head-stem head-stem--5"><div class="flower__line"><div class="head-stem__image"></div></div></div>
+    
+          <!-- MARGARITAS AZULES: 12, armadas por JS (buildFlowers, ver
+               script al final) e insertadas justo aquí (antes de la
+               hierba) para que se intercalen visualmente con los tallos
+               de arriba en vez de quedar todas al frente. -->
+          <div id="flowers-mount"></div>
+
+          <!-- CÓDIGO RESTANTE DE LA HIERBA -->
+          <div class="grow-ans" style="--d:1.2s"><div class="flower__g-long"><div class="flower__g-long__top"></div><div class="flower__g-long__bottom"></div></div></div><div class="growing-grass"><div class="flower__grass flower__grass--1"><div class="flower__grass--top"></div><div class="flower__grass--bottom"></div><div class="flower__grass__leaf flower__grass__leaf--1"></div><div class="flower__grass__leaf flower__grass__leaf--2"></div><div class="flower__grass__leaf flower__grass__leaf--3"></div><div class="flower__grass__leaf flower__grass__leaf--4"></div><div class="flower__grass__leaf flower__grass__leaf--5"></div><div class="flower__grass__leaf flower__grass__leaf--6"></div><div class="flower__grass__leaf flower__grass__leaf--7"></div><div class="flower__grass__leaf flower__grass__leaf--8"></div><div class="flower__grass__overlay"></div></div></div><div class="growing-grass"><div class="flower__grass flower__grass--2"><div class="flower__grass--top"></div><div class="flower__grass--bottom"></div><div class="flower__grass__leaf flower__grass__leaf--1"></div><div class="flower__grass__leaf flower__grass__leaf--2"></div><div class="flower__grass__leaf flower__grass__leaf--3"></div><div class="flower__grass__leaf flower__grass__leaf--4"></div><div class="flower__grass__leaf flower__grass__leaf--5"></div><div class="flower__grass__leaf flower__grass__leaf--6"></div><div class="flower__grass__leaf flower__grass__leaf--7"></div><div class="flower__grass__leaf flower__grass__leaf--8"></div><div class="flower__grass__overlay"></div></div></div><div class="grow-ans" style="--d:2.4s"><div class="flower__g-right flower__g-right--1"><div class="leaf"></div></div></div><div class="grow-ans" style="--d:2.8s"><div class="flower__g-right flower__g-right--2"><div class="leaf"></div></div></div><div class="grow-ans" style="--d:2.8s"><div class="flower__g-front"><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--1"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--2"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--3"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--4"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--5"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--6"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--7"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__leaf-wrapper flower__g-front__leaf-wrapper--8"><div class="flower__g-front__leaf"></div></div><div class="flower__g-front__line"></div></div></div><div class="grow-ans" style="--d:3.2s"><div class="flower__g-fr"><div class="leaf"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--1"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--2"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--3"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--4"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--5"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--6"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--7"></div><div class="flower__g-fr__leaf flower__g-fr__leaf--8"></div></div></div><div class="long-g long-g--0"><div class="grow-ans" style="--d:3s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:2.2s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:3.4s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:3.6s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--1"><div class="grow-ans" style="--d:3.6s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:3.8s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:4s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:4.2s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--2"><div class="grow-ans" style="--d:4s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:4.2s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:4.4s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:4.6s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--3"><div class="grow-ans" style="--d:4s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:4.2s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:3s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:3.6s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--4"><div class="grow-ans" style="--d:4s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:4.2s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:3s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:3.6s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--5"><div class="grow-ans" style="--d:4s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:4.2s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:3s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:3.6s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--6"><div class="grow-ans" style="--d:4.2s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:4.4s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:4.6s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:4.8s"><div class="leaf leaf--3"></div></div></div><div class="long-g long-g--7"><div class="grow-ans" style="--d:3s"><div class="leaf leaf--0"></div></div><div class="grow-ans" style="--d:3.2s"><div class="leaf leaf--1"></div></div><div class="grow-ans" style="--d:3.5s"><div class="leaf leaf--2"></div></div><div class="grow-ans" style="--d:3.6s"><div class="leaf leaf--3"></div></div></div>
+        </div>
+    </div>
+
+    <!-- ===== ESTRUCTURA HTML PARA LA TARJETA DE AMOR ===== -->
+    <div id="love-card-overlay" class="love-card-overlay">
+        <div id="love-card" class="love-card">
+            <span class="close-btn">&times;</span>
+            <p id="love-text" class="love-text"></p>
+        </div>
+    </div>
+
+    <!-- DEDICA:CONFIG -->
+    <script>
+        /* ════════════════════════════════════════════════════════════════
+           ██  CAMPOS EDITABLES (schema.json)  ██
+           ═════════════════════════════════════════════════════════════ */
+        const DEFAULTS = {
+            titulo: "Feliz Día de los Carritos Hot Wheels 🚗",
+            galeria: ["assets/card1.jpg", "assets/card2.jpg", "assets/card3.jpg"],
+            frases: [
+                ":🏎️ Contigo, siempre voy a toda velocidad. ❤️",
+                "🚗 Tú + yo = mi carrera favorita",
+                "🏁 Contigo, la vida es una carrera que quiero ganar juntos",
+                "🚗 No importa el camino si voy contigo.",
+                "Una vida contigo no tiene suficientes vueltas. ❤️",
+                "Mi mejor aventura: tú. 🏎️",
+                "❤️ Contigo, cualquier camino se siente bonito.",
+                "❤️ Tú haces especial cualquier recorrido"
+            ],
+            musica: "assets/musica.mp3",
+            textoInicio: "Tengo algo especial",
+            imagenInicio: "assets/log.png"
+        };
+        const CONFIG_FIELDS = (window.DEDICA && window.DEDICA.merge) ? window.DEDICA.merge(DEFAULTS, window.DEDICA.config) : DEFAULTS;
+
+        // Precarga las fotos de la tarjeta de una vez (durante la intro,
+        // antes de que el usuario llegue a tocar una flor) - sin esto, la
+        // primera vez que se abria la tarjeta la foto de fondo tardaba en
+        // aparecer porque recien se pedia por red en ese momento.
+        (Array.isArray(CONFIG_FIELDS.galeria) && CONFIG_FIELDS.galeria.length ? CONFIG_FIELDS.galeria : DEFAULTS.galeria).forEach(function (src) {
+            new Image().src = src;
+        });
+
+        document.getElementById('titulo-text').textContent = CONFIG_FIELDS.titulo || DEFAULTS.titulo;
+        document.getElementById('overlay-text').textContent = CONFIG_FIELDS.textoInicio || DEFAULTS.textoInicio;
+        document.getElementById('overlay-image').src = CONFIG_FIELDS.imagenInicio || DEFAULTS.imagenInicio;
+        // .src va DIRECTO sobre el <audio> (sin <source> hijo) - se
+        // re-resuelve solo al reasignarlo, sin necesitar .load() en ningun
+        // lado (ver docs/20-OPERACION/publicar-plantilla-nueva.md, seccion
+        // 4b - el patron recomendado para plantillas nuevas).
+        document.getElementById('background-music').src = CONFIG_FIELDS.musica || DEFAULTS.musica;
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioOverlay = document.getElementById('audio-overlay');
+            const music = document.getElementById('background-music');
+
+            // Intro: 6 autitos (fotos reales, no el ícono estilizado de los
+            // tallos) volando de lado a lado con su rayo de propulsor
+            // detrás, alternando sentido y altura. Armado por JS para no
+            // repetir 6 bloques de HTML casi idénticos a mano.
+            //
+            // "dir" sigue hacia donde mira CADA foto de verdad (revisadas
+            // una por una, no todas miran para el mismo lado): un auto que
+            // mira a la derecha vuela de izquierda a derecha ("ltr", entra
+            // por la izquierda y sale por la derecha, punta adelante);uno
+            // que mira a la izquierda vuela al revés ("rtl"). Así nunca
+            // hace falta voltear ninguna imagen - cada uno vuela para el
+            // lado que ya mira de fábrica.
+            const introOverlay = document.getElementById('intro-overlay');
+            // Un solo literal por imagen, reusado en INTRO_CARS y en BG_CARS
+            // (mas abajo) - las herramientas de entrega (generar-html-entrega.mjs)
+            // embeben cada ocurrencia de una ruta de asset como base64 por
+            // separado, asi que escribir el mismo path dos veces duplicaba
+            // el peso de estas 6 imagenes en el HTML de entrega.
+            const CAR_IMGS = ['assets/der1.png', 'assets/izq1.png', 'assets/der2.png', 'assets/izq2.png', 'assets/der3.png', 'assets/izq3.png'];
+            // Intercalados a proposito: der1, izq1, der2, izq2, der3, izq3
+            // (nunca dos del mismo lado seguidos) - pedido explicito.
+            const INTRO_CARS = [
+                { src: CAR_IMGS[0], dir: 'ltr', top: '10vh', duration: '6.6s', delay: '0s' },  // mira a la derecha
+                { src: CAR_IMGS[1], dir: 'rtl', top: '22vh', duration: '7.1s', delay: '.3s' }, // mira a la izquierda
+                { src: CAR_IMGS[2], dir: 'ltr', top: '38vh', duration: '6.3s', delay: '.6s' }, // mira a la derecha
+                { src: CAR_IMGS[3], dir: 'rtl', top: '54vh', duration: '7.3s', delay: '.2s' }, // mira a la izquierda
+                { src: CAR_IMGS[4], dir: 'ltr', top: '68vh', duration: '6.7s', delay: '.7s' }, // mira a la derecha
+                { src: CAR_IMGS[5], dir: 'rtl', top: '80vh', duration: '7s',   delay: '.4s' }  // mira a la izquierda
+            ];
+            // Los autitos se arman recien al tocar "Toca para abrir", no
+            // antes: una animacion CSS arranca sola apenas el elemento entra
+            // al DOM (la excepcion de arriba, ".container #intro-overlay *
+            // { animation-play-state: running }", ya los deja corriendo pese
+            // a que el body sigue con la clase "container" puesta) - si se
+            // armaran de una al cargar la pagina, ya habrian volado y
+            // desaparecido para cuando el usuario realmente toca la pantalla.
+            // Compartido entre los autitos de la intro y los de fondo: un
+            // puñado de puntitos brillantes que se alejan del auto y se
+            // apagan en bucle, como el humo/chispas de un cohete.
+            function buildThruster(count, sizeMin, sizeMax) {
+                const thruster = document.createElement('div');
+                thruster.className = 'thruster';
+                for (let i = 0; i < count; i++) {
+                    const p = document.createElement('span');
+                    p.className = 'thruster-particle';
+                    const size = sizeMin + Math.random() * (sizeMax - sizeMin);
+                    p.style.width = size + 'vmin';
+                    p.style.height = size + 'vmin';
+                    p.style.marginTop = (-size / 2) + 'vmin';
+                    p.style.top = (50 + (Math.random() * 60 - 30)) + '%';
+                    const dur = 0.45 + Math.random() * 0.35;
+                    p.style.animationDuration = dur + 's';
+                    // retraso NEGATIVO: arranca la animacion ya a mitad de
+                    // camino, para que las partículas no aparezcan todas
+                    // juntas de golpe sino como un chorro continuo.
+                    p.style.animationDelay = '-' + (Math.random() * dur).toFixed(2) + 's';
+                    thruster.appendChild(p);
+                }
+                return thruster;
+            }
+            function buildIntroCars() {
+                INTRO_CARS.forEach(cfg => {
+                    const car = document.createElement('div');
+                    car.className = 'intro-car intro-car--' + cfg.dir;
+                    car.style.top = cfg.top;
+                    car.style.animationDuration = cfg.duration;
+                    car.style.animationDelay = cfg.delay;
+                    car.appendChild(buildThruster(8, 2, 4.8));
+
+                    const img = document.createElement('img');
+                    img.src = cfg.src;
+                    img.alt = '';
+                    car.appendChild(img);
+                    introOverlay.appendChild(car);
+                });
+            }
+
+            // --- 8 flores en total, todas margaritas (el tipo "classic" de
+            // 4 pétalos se sacó a pedido explícito - ya no se usa) - en las
+            // alturas ALTAS (88-124vmin) que antes tenían los tallos de
+            // autos, intercambiadas a propósito: "las flores en la parte
+            // más alta, los hotwheels abajo en la base". El contenedor
+            // #flowers-mount (ver CSS arriba) las mantiene siempre POR
+            // DEBAJO de cualquier tallo - los hotwheels y sus tallos van
+            // siempre encima, a propósito.
+            // Delays mucho mas cortos que antes (0.1-0.8s, antes 1.2-1.9s) -
+            // "se estan demorando mucho en salir las flores" - el atraso
+            // real era este escalonado, no la intro. La 2da y la 8va usaban
+            // "sway-center" las dos (mismo angulo, casi la misma altura),
+            // asi que terminaban casi superpuestas en medio del ramo; la
+            // 8va ahora usa un angulo propio ("sway-right-30", no repetido
+            // en este set) para separarlas de verdad.
+            // Sin stagger: todas las flores/tallos brotan JUNTAS y de una
+            // vez (delay 0 en todas) a pedido explicito - un escalonado,
+            // por mas corto que fuera, se seguia sintiendo "lento".
+            // Alturas subidas (mas altas que antes, pedido explicito) y la
+            // flor del medio ("sway-center") deliberadamente mas alta que
+            // el resto del ramo.
+            const FLOWER_SLOTS = [
+                { h: 130, z: 20, sway: 'sway-left-35', dur: '4.6s', delay: 0, type: 'daisy' },
+                { h: 136, z: 21, sway: 'sway-right-35', dur: '4.8s', delay: 0, type: 'daisy' },
+                { h: 112, z: 22, sway: 'sway-left-20', dur: '4.4s', delay: 0, type: 'daisy' },
+                { h: 132, z: 23, sway: 'sway-center', dur: '4.9s', delay: 0, type: 'daisy' },
+                { h: 116, z: 24, sway: 'sway-right-20', dur: '4.5s', delay: 0, type: 'daisy' },
+                { h: 100, z: 25, sway: 'sway-left-10', dur: '4.3s', delay: 0, type: 'daisy' },
+                { h: 105, z: 26, sway: 'sway-right-10', dur: '4.6s', delay: 0, type: 'daisy' },
+                { h: 130, z: 27, sway: 'sway-right-30', dur: '5s', delay: 0, type: 'daisy' }
+            ];
+            const OUTER_PETALS = 14, INNER_PETALS = 13;
+            function buildFlower(slot, index) {
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+                flower.style.setProperty('--h', slot.h + 'vmin');
+                flower.style.setProperty('--d', slot.delay + 's');
+                flower.style.left = '50%';
+                flower.style.zIndex = slot.z;
+                flower.style.animation = slot.sway + ' ' + slot.dur + ' linear infinite';
+
+                const leafs = document.createElement('div');
+                leafs.className = 'flower__leafs';
+                leafs.style.animationDelay = slot.delay + 's';
+
+                const calyx = document.createElement('div');
+                calyx.className = 'flower__calyx';
+                leafs.appendChild(calyx);
+
+                if (slot.type === 'classic') {
+                    // El diseño original: 4 pétalos anchos ya orientados a
+                    // mano (ver .flower__leaf--classic-1..4), no un abanico
+                    // generado por ángulo como la margarita.
+                    for (let i = 1; i <= 4; i++) {
+                        const p = document.createElement('div');
+                        p.className = 'flower__leaf--classic flower__leaf--classic-' + i;
+                        leafs.appendChild(p);
+                    }
+                } else {
+                    for (let i = 0; i < OUTER_PETALS; i++) {
+                        const p = document.createElement('div');
+                        p.className = 'flower__leaf flower__leaf--outer';
+                        p.style.transform = 'rotate(' + (i * (360 / OUTER_PETALS)) + 'deg) rotateX(60deg)';
+                        leafs.appendChild(p);
+                    }
+                    for (let i = 0; i < INNER_PETALS; i++) {
+                        const p = document.createElement('div');
+                        p.className = 'flower__leaf flower__leaf--inner';
+                        p.style.transform = 'rotate(' + (i * (360 / INNER_PETALS) + 14) + 'deg) rotateX(55deg)';
+                        leafs.appendChild(p);
+                    }
+                }
+
+                // Solo la primera flor lleva las lucecitas (igual que en el
+                // diseño original, que solo se las daba a flower--1).
+                if (index === 0) {
+                    for (let i = 1; i <= 8; i++) {
+                        const light = document.createElement('div');
+                        light.className = 'flower__light flower__light--' + i;
+                        leafs.appendChild(light);
+                    }
+                }
+
+                const center = document.createElement('div');
+                center.className = slot.type === 'classic' ? 'flower__white-circle--classic' : 'flower__white-circle';
+                leafs.appendChild(center);
+                flower.appendChild(leafs);
+
+                const line = document.createElement('div');
+                line.className = 'flower__line';
+                for (let i = 1; i <= 4; i++) {
+                    const ll = document.createElement('div');
+                    ll.className = 'flower__line__leaf flower__line__leaf--' + i;
+                    line.appendChild(ll);
+                }
+                flower.appendChild(line);
+                return flower;
+            }
+            function buildFlowers() {
+                const mount = document.getElementById('flowers-mount');
+                FLOWER_SLOTS.forEach((slot, i) => mount.appendChild(buildFlower(slot, i)));
+            }
+            buildFlowers();
+
+            // --- Campo de estrellas: puntos fijos titilando, repartidos por
+            // toda la pantalla. Armados ahora (no hace falta esperar al
+            // clic) - quedan pausados junto con el resto del ramo hasta que
+            // revealRamo() los libere.
+            const STAR_COUNT = 32;
+            const starField = document.getElementById('star-field');
+            for (let i = 0; i < STAR_COUNT; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = 1 + Math.random() * 2.2;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = (Math.random() * 100) + '%';
+                star.style.top = (Math.random() * 100) + '%';
+                const dur = 1.8 + Math.random() * 3;
+                star.style.animationDuration = dur + 's';
+                star.style.animationDelay = '-' + (Math.random() * dur).toFixed(2) + 's';
+                starField.appendChild(star);
+            }
+
+            // --- Autitos de fondo: cruzan la pantalla en diagonal, en bucle
+            // continuo (a diferencia de los de la intro, que vuelan una
+            // sola vez y luego desaparecen) - aun mas rapido que antes a
+            // pedido explicito. "dir" se elige igual que en la intro, segun
+            // hacia donde mira cada foto de verdad, para no tener que
+            // voltear ninguna: las que miran a la derecha cruzan hacia
+            // abajo-derecha ("dr"), las que miran a la izquierda hacia
+            // abajo-izquierda ("dl"). NO se arman ahora - buildBgCars() se
+            // llama recien despues de que las flores ya terminaron de
+            // brotar (ver revealRamo). IMPORTANTE: delay siempre POSITIVO
+            // (nunca negativo) - un delay negativo en una animacion que
+            // recien arranca hace que el navegador la dibuje ya a mitad de
+            // camino (algun punto random de la pantalla, con opacidad a
+            // medias) en vez de arrancar desde 0% (fuera de pantalla),
+            // dando el efecto de "aparece de la nada en el centro" en vez
+            // de entrar prolijamente desde el lado que le corresponde.
+            const BG_CARS = [
+                { src: CAR_IMGS[0], dir: 'dr', top: '5vh',  duration: '7.1s', delay: '0s' },   // mira a la derecha
+                { src: CAR_IMGS[1], dir: 'dl', top: '18vh', duration: '8.3s', delay: '1.6s' }, // mira a la izquierda
+                { src: CAR_IMGS[2], dir: 'dr', top: '35vh', duration: '6.4s', delay: '3.2s' }, // mira a la derecha
+                { src: CAR_IMGS[3], dir: 'dl', top: '50vh', duration: '7.9s', delay: '0.8s' }, // mira a la izquierda
+                { src: CAR_IMGS[4], dir: 'dr', top: '65vh', duration: '6.8s', delay: '2.4s' }, // mira a la derecha
+                { src: CAR_IMGS[5], dir: 'dl', top: '80vh', duration: '7.5s', delay: '4s' }    // mira a la izquierda
+            ];
+            const bgCarsMount = document.getElementById('bg-cars');
+            function buildBgCars() {
+            BG_CARS.forEach(cfg => {
+                const car = document.createElement('div');
+                car.className = 'bg-car bg-car--' + cfg.dir;
+                car.style.top = cfg.top;
+                car.style.animationDuration = cfg.duration;
+                car.style.animationDelay = cfg.delay;
+                car.appendChild(buildThruster(4, 0.8, 1.8));
+                const img = document.createElement('img');
+                img.src = cfg.src;
+                img.alt = '';
+                car.appendChild(img);
+                bgCarsMount.appendChild(car);
+            });
+            }
+
+            function revealRamo() {
+                document.body.classList.remove("container");
+                // Los autitos de fondo recien aparecen cuando el ramo ya
+                // broto del todo (el tallo mas el brote de los petalos,
+                // ver grow-flower-tree/blooming-flower, ~3s - misma
+                // velocidad que el otro ramo de hotwheels, pedido
+                // explicito), nunca antes que las flores.
+                setTimeout(buildBgCars, 3200);
+            }
+
+            function startExperience() {
+                const playPromise = music.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => { console.log("Autoplay fue prevenido."); });
+                }
+                audioOverlay.style.opacity = '0';
+                setTimeout(() => { audioOverlay.style.display = 'none'; }, 800);
+                buildIntroCars();
+
+                // El ramo recién se revela DESPUÉS de la intro de autitos
+                // volando - antes de esto, "container" sigue puesto (pausa
+                // todas las animaciones del ramo, ver ".container * { ... }"
+                // más arriba), así que no se ve nada del ramo todavía.
+                setTimeout(() => {
+                    introOverlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        introOverlay.style.display = 'none';
+                        revealRamo();
+                    }, 600);
+                }, 2800);
+            }
+
+            audioOverlay.addEventListener('click', startExperience);
+
+            const particleContainer = document.querySelector('.background-particles');
+            const numberOfParticles = 60; 
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 8 + 5) + 's'; 
+                particle.style.animationDelay = (Math.random() * 10) + 's';
+                particleContainer.appendChild(particle);
+            }
+        });      
+    </script>
+    
+    <!-- ===== SCRIPT MEJORADO PARA LA LÓGICA DE LA TARJETA ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Elementos de la tarjeta ---
+            const stemImages = document.querySelectorAll('.head-stem__image');
+            const loveCardOverlay = document.getElementById('love-card-overlay');
+            const loveCard = document.getElementById('love-card');
+            const loveText = document.getElementById('love-text');
+
+            // --- Contenido editable (ver DEFAULTS/CONFIG_FIELDS mas arriba) ---
+            const cardBackgrounds = (Array.isArray(CONFIG_FIELDS.galeria) && CONFIG_FIELDS.galeria.length) ? CONFIG_FIELDS.galeria : DEFAULTS.galeria;
+            const loveMessages = (Array.isArray(CONFIG_FIELDS.frases) && CONFIG_FIELDS.frases.length) ? CONFIG_FIELDS.frases : DEFAULTS.frases;
+            
+            // --- Copias para la selección aleatoria sin repetición ---
+            let availableBackgrounds = [...cardBackgrounds];
+            let availableMessages = [...loveMessages];
+
+
+            // --- Funciones para abrir y cerrar ---
+            function openCard(event) {
+                // Detenemos la propagación para evitar cierres accidentales.
+                event.stopPropagation(); 
+                
+                // Si la lista de fondos disponibles está vacía, la rellenamos de nuevo.
+                if (availableBackgrounds.length === 0) {
+                    availableBackgrounds = [...cardBackgrounds];
+                }
+                
+                // Si la lista de mensajes disponibles está vacía, la rellenamos de nuevo.
+                if (availableMessages.length === 0) {
+                    availableMessages = [...loveMessages];
+                }
+
+                // Seleccionamos un índice aleatorio de los elementos disponibles.
+                const bgIndex = Math.floor(Math.random() * availableBackgrounds.length);
+                // Extraemos el elemento de la lista para que no se pueda volver a seleccionar.
+                const randomBg = availableBackgrounds.splice(bgIndex, 1)[0];
+
+                // Hacemos lo mismo para los mensajes.
+                const msgIndex = Math.floor(Math.random() * availableMessages.length);
+                const randomMsg = availableMessages.splice(msgIndex, 1)[0];
+
+                // Asignamos los valores seleccionados.
+                loveCard.style.backgroundImage = `url('${randomBg}')`;
+                loveText.textContent = randomMsg;
+
+                // Mostramos la tarjeta.
+                loveCardOverlay.style.display = 'flex';
+                setTimeout(() => {
+                    loveCardOverlay.style.opacity = '1';
+                    loveCardOverlay.classList.add('visible');
+                }, 10);
+            }
+
+            function closeCard() {
+                loveCardOverlay.style.opacity = '0';
+                loveCardOverlay.classList.remove('visible');
+                setTimeout(() => {
+                    loveCardOverlay.style.display = 'none';
+                }, 400); // Coincide con la duración de la transición en CSS
+            }
+
+            // --- Asignar Eventos ---
+            // Abrir la tarjeta al hacer clic en una imagen de tallo
+            stemImages.forEach(image => {
+                image.addEventListener('click', openCard);
+            });
+
+            // Cerrar la tarjeta al hacer clic en cualquier lugar de la superposición.
+            loveCardOverlay.addEventListener('click', closeCard);
+        });
+    </script>
+  <style>*{-webkit-user-select:none;user-select:none}img,audio,video{-webkit-user-drag:none;user-drag:none}</style>
+<script>(function(){
+try{
+var allowed="cdn.dedicacodes.com";
+var h=location.hostname;
+
+}catch(e){}
+try{
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
+document.addEventListener('dragstart',function(e){e.preventDefault();});
+document.addEventListener('keydown',function(e){
+var k=e.key;
+var blocked=k==='F12'
+||(e.ctrlKey&&e.shiftKey&&['I','i','J','j','C','c','K','k'].indexOf(k)!==-1)
+||(e.ctrlKey&&(k==='u'||k==='U'||k==='s'||k==='S'))
+||(e.metaKey&&e.altKey&&['I','i','J','j'].indexOf(k)!==-1);
+if(blocked)e.preventDefault();
+});
+}catch(e){}
+})();</script>
+</body>
+</html>
